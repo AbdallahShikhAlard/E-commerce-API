@@ -1,0 +1,18 @@
+  "name": "aser 5120",
+  "description": "work pc",
+  "richDescription": "",
+  "trueimage": "",
+  "images": [],
+  "brand": "aser",
+  "price": "10000",
+  "category": "66f06bf283314d8eee603cd4",
+  "countInStock": 10,
+  "rating": 100,
+  "numReviews": 100,
+  "isFeatured": true
+
+
+  /////
+
+  "email" : "mhmedemail@gmail.com",
+  "password" : "mhmed123"
