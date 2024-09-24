@@ -10,7 +10,6 @@ router.get('/', async (req , res)=>{
     try {
         const orderslist = await Order.find()
         .populate('user' , 'name')
-        .populate({path : 'orderItems' ,populate : {path : 'product' , populate : 'category'}})
         res.send(orderslist)    
     } catch (err) {
         res.status(500).json({ message : err.message})
@@ -22,6 +21,9 @@ router.get('/:id', async (req , res)=>{
         const order = await Order.findById(req.params.id)
         .populate('user' , 'name')
         .populate({path : 'orderItems' , populate : 'product'})
+        if(!order){
+            throw new Error("not found");
+        }
         res.send(order)    
     } catch (err) {
         res.status(500).json({ message : err.message})
@@ -61,9 +63,9 @@ router.put('/:id', async (req , res)=>{
         const {status} = req.body
         const order = await Order.findByIdAndUpdate( req.params.id , {status:status},{new : true})
         if(!order){
-            res.status(401).send("Not found!")
+            throw new Error("not found");
         }
-        res.status(200).send(category)    
+        res.status(200).send(order)    
     } catch (err) {
         res.status(500).json({ message : err.message})
     }
@@ -73,9 +75,9 @@ router.delete('/:id', async (req , res)=>{
     try{
     const order = await Order.findByIdAndDelete( req.params.id)
     if(!order){
-        res.status(401).send("Not found!")
+        throw new Error("not found");
     }
-        res.status(200).send(category)    
+        res.status(200).send(order)    
     } catch (err) {
         res.status(500).json({ message : err.message})
     }
