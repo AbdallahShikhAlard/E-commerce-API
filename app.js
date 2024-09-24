@@ -4,7 +4,7 @@ const dotenv = require('dotenv')
 const categoryRouter = require('./routers/categoryRouter')
 const productRouter = require('./routers/poductRouter')
 const userRouter = require('./routers/userRouter')
-const authJwt = require('./middleware/authenticateToken')
+const orderRouter = require('./routers/orderRouter')
 dotenv.config()
 
 
@@ -21,6 +21,7 @@ db.once('open' , ()=>{console.log('connected to DB')})
 app.use('/category', categoryRouter)
 app.use('/product', productRouter)
 app.use('/user', userRouter)
+app.use('/order' , orderRouter)
 app.use(( err , req , res , next)=>{
     if(err){
         res.status(500).json({message : err})

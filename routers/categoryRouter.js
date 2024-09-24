@@ -6,8 +6,8 @@ router.get('/', async (req , res)=>{
     try {
         const categorylist = await Category.find()
         res.send(categorylist)    
-    } catch (error) {
-        res.status(500).json({ message : error.message})
+    } catch (err) {
+        res.status(500).json({ message : err.message})
     }
     
 })
@@ -18,8 +18,8 @@ router.get('/:id', async (req , res)=>{
             res.status(500).send("Not found!")
         }
         res.status(200).send(category)    
-    } catch (error) {
-        res.status(500).json({ message : error.message})
+    } catch (err) {
+        res.status(500).json({ message : err.message})
     }
 })
 //create a category
@@ -29,8 +29,8 @@ router.post('/', async (req , res)=>{
         let category = new Category( {name , color , icon} )
         category = await category.save()
         res.send(category)    
-    } catch (error) {
-        res.status(500).json({ message : error.message})
+    } catch (err) {
+        res.status(500).json({ message : err.message})
     }
     
 })
@@ -47,8 +47,8 @@ router.put('/:id', async (req , res)=>{
             res.status(500).send("Not found!")
         }
         res.status(200).send(category)    
-    } catch (error) {
-        res.status(500).json({ message : error.message})
+    } catch (err) {
+        res.status(500).json({ message : err.message})
     }
 })
 
@@ -56,8 +56,8 @@ router.delete('/:id', async (req , res)=>{
     try {
         const category = await Category.findByIdAndDelete(req.params.id)
         res.status(200).send(category)    
-    } catch (error) {
-        res.status(500).json({ message : error.message})
+    } catch (err) {
+        res.status(500).json({ message : err.message})
     }
 })
 
