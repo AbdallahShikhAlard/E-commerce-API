@@ -32,6 +32,7 @@ const orderSchema = mongoose.Schema({
     },
     totalPrice :{
         type: Number ,  
+        required : true
     },
     user :{
         type: mongoose.Types.ObjectId , 
