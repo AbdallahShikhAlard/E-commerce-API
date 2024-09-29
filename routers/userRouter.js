@@ -57,7 +57,7 @@ router.post('/login' , async (req,res)=>{
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET,{expiresIn : '1d'});  
             res.status(200).json({user:user.name , token : token})
         }else{
-            res.status(500).json({message : "worng password"})
+            res.status(500).json({message : "wrong password"})
         }
     } catch (err) {
         res.status(500).json({message : err.message})
