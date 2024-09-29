@@ -6,7 +6,9 @@ const User = require('../modules/user')
 const authenticateToken = require('../middleware/authenticateToken')
 const mongoose = require('mongoose')
 const multer = require('multer')
-  
+const path = require('path')
+const fs = require('fs-extra')
+
 const FILE_TYPE_MAP = {
     'image/png' : 'png',
     'image/jpeg' : 'jpeg',
@@ -167,12 +169,32 @@ router.put('/images/:id' ,authenticateToken,upload.array('images',10), async (re
 
 router.delete('/:id', authenticateToken,async (req , res)=>{
     try {
+        if(!mongoose.isValidObjectId(req.params.id))return res.status(500).send("invaled product ID")
         const user = await User.findById(req.user.id)
         if(!user.isAdmin){     
             return res.status(400).send("not admin")
         }
         const product = await Product.findByIdAndDelete(req.params.id)
-        res.status(200).send(product)    
+        if(!product){throw new Error("product not found");
+        }
+        const imageURL =  product.image.split('/')
+        const imageName = imageURL[4]
+        const imagepath = path.join(__dirname , '..','public' , 'uploads',imageName)
+        
+        if(fs.existsSync(imagepath)){
+            fs.remove(imagepath)
+        }
+
+        const imagesArray = await product.images.map(images=>{
+            const ImageURL = images.split('/')
+            const ImageName = ImageURL[4]
+            const Imagepath = path.join(__dirname , '..','public' , 'uploads',ImageName)
+            if(fs.existsSync(Imagepath)){
+                fs.remove(Imagepath)
+            }
+        })
+        
+        res.status(200).send(product)
     } catch (error) {
         res.status(500).json({ message : error.message})
     }

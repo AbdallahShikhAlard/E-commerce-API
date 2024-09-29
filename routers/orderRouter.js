@@ -40,6 +40,8 @@ router.post('/', authenticateToken ,async (req , res)=>{
                 product : orderItem.product
             })
             newOrderItem = await newOrderItem.save()
+            const productCount = await OrderItem.find(newOrderItem).populate('product' ,'countInStock' )
+            const product = await Product.findByIdAndUpdate(orderItem.product , {countInStock : productCount.countInStock -= orderItem.quantity})
             return newOrderItem._id;
         }))
 
@@ -51,10 +53,10 @@ router.post('/', authenticateToken ,async (req , res)=>{
             return totalPrice
         }))
         const totalPrice = totalPrices.reduce((a,d)=>a+d , 0)
-        console.log(totalPrice)
+        
         const { shappingAddress1 , shappingAddress2 , city , zip , country , phone , status  } =  req.body
         let order = new Order( {orderItems :  newOrderItemResolved , shappingAddress1 , shappingAddress2 , city , zip , country , phone , status , totalPrice ,user: req.user.id} )
-        
+
         order = await order.save()        
         res.status(200).json(order)    
 

@@ -19,5 +19,21 @@
 
 
   /////
+  
   "email" : "abdemail@gmail.com",
   "password" : "abd123"
+
+  ////
+
+  {
+  "orderItems":[
+{
+  "quantity": 4,
+  "product" : "66e9aba97ad5f60008858e83"
+},
+{
+  "quantity": 1,
+  "product": "66f01ec562502b845b30eaa2"
+}
+]
+}
