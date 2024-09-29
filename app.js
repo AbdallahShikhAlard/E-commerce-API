@@ -8,10 +8,10 @@ const orderRouter = require('./routers/orderRouter')
 dotenv.config()
 
 
-
 const app = express()
 const port = 8080
 app.use(express.json())
+app.use(express.static('public'))
 
 mongoose.connect(process.env.DB_URI)
 const db = mongoose.connection
@@ -28,4 +28,4 @@ app.use(( err , req , res , next)=>{
     }
 })
 
-app.listen(port , ()=>{console.log(`running on port ${port}`)})
+app.listen(port , ()=>{console.log(`http://0.0.0.0:${port}`)})
