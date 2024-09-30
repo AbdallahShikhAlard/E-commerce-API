@@ -3,7 +3,7 @@ const router = express.Router()
 const User = require('../modules/user')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const authJwt = require('../middleware/authenticateToken')
+const authenticateToken = require('../middleware/authenticateToken')
 
 router.get('/', async (req , res)=>{
     try {
@@ -62,6 +62,36 @@ router.post('/login' , async (req,res)=>{
     } catch (err) {
         res.status(500).json({message : err.message})
     }
+})
+router.put('/' , async (req , res)=>{
+
+})
+router.put('/', authenticateToken, async (req, res) => {  
+    const { name, oldPassword, newPassword } = req.body;  
+
+    try {  
+        const user = await User.findById(req.user.id);  
+        if (!user) {  
+            return res.status(404).json({ message: 'User not found.' });  
+        }  
+
+        if (name) {  
+            user.name = name;  
+        }  
+
+        if (oldPassword && newPassword) {  
+            const isMatch = await bcrypt.compare(oldPassword, user.passwordhash);  
+            if (!isMatch) {  
+                return res.status(403).json({ message: 'Old password is incorrect.' });  
+            }   
+            user.passwordhash = await bcrypt.hash(newPassword, 10);  
+        }  
+
+        await user.save();  
+        res.status(200).json({ message: 'User information updated successfully.', user });  
+    } catch (err) {  
+        res.status(500).json({ message: err.message });  
+    }  
 })
 
 module.exports = router 

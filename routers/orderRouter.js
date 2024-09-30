@@ -31,40 +31,87 @@ router.get('/:id', async (req , res)=>{
     }
     
 })
-//create an order
-router.post('/', authenticateToken ,async (req , res)=>{
-    try {
-        const orderItemsIds = Promise.all(req.body.orderItems.map(async orderItem =>{
-            let newOrderItem = new OrderItem({
-                quantity : orderItem.quantity,
-                product : orderItem.product
-            })
-            newOrderItem = await newOrderItem.save()
-            const productCount = await OrderItem.find(newOrderItem).populate('product' ,'countInStock' )
-            const product = await Product.findByIdAndUpdate(orderItem.product , {countInStock : productCount.countInStock -= orderItem.quantity})
-            return newOrderItem._id;
-        }))
+// Create an order  
+router.post('/', authenticateToken, async (req, res) => {  
+    try {    
+        const {  
+            shappingAddress1,  
+            shappingAddress2,  
+            city,  
+            zip,  
+            country,  
+            phone,  
+            status,  
+            orderItems  
+        } = req.body;  
+  
+        if (!shappingAddress1 || !city || !zip || !country || !phone || !orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {  
+            return res.status(400).json({ message: 'Missing required fields: shappingAddress1, city, zip, country, phone, or orderItems' });  
+        }  
 
-        const newOrderItemResolved = await orderItemsIds
-        const totalPrices = await Promise.all(newOrderItemResolved.map(async orderItemsId =>{
-            const orderItem = await OrderItem.findById(orderItemsId).populate('product','price')
-            const totalPrice = orderItem.product.price * orderItem.quantity
+        for (const item of orderItems) {  
+            if (!item.quantity || !item.product) {  
+                return res.status(400).json({ message: 'Each order item must include both a quantity and a product ID.' });  
+            }  
             
-            return totalPrice
-        }))
-        const totalPrice = totalPrices.reduce((a,d)=>a+d , 0)
-        
-        const { shappingAddress1 , shappingAddress2 , city , zip , country , phone , status  } =  req.body
-        let order = new Order( {orderItems :  newOrderItemResolved , shappingAddress1 , shappingAddress2 , city , zip , country , phone , status , totalPrice ,user: req.user.id} )
+             
+            const product = await Product.findById(item.product);  
+            if (!product) {  
+                return res.status(400).json({ message: `Product with ID ${item.product} not found.` });  
+            }
+            if (product.countInStock < item.quantity) {   
+                return res.status(400).json({ message: `Insufficient stock for product ID ${item.product}. Available stock: ${product.countInStock}, Requested: ${item.quantity}` });  
+            }  
+            
+        }  
 
-        order = await order.save()        
-        res.status(200).json(order)    
+        const orderItemsIds = await Promise.all(orderItems.map(async orderItem => {  
+            let newOrderItem = new OrderItem({  
+                quantity: orderItem.quantity,  
+                product: orderItem.product  
+            });  
+            newOrderItem = await newOrderItem.save();  
+            const populatedOrderItem = await OrderItem.findById(newOrderItem._id).populate('product', 'countInStock');  
+            const product = populatedOrderItem.product;  
 
-    } catch (err) {
-        res.status(500).json({ message : err.message})
-    }
-    
-})
+            if (product) {  
+                const updatedCountInStock = product.countInStock - orderItem.quantity;  
+                await Product.findByIdAndUpdate(product._id, { countInStock: updatedCountInStock });  
+            } else {  
+                throw new Error('Product not found');  
+            }  
+            return newOrderItem._id;  
+        }));  
+
+        const totalPrices = await Promise.all(orderItemsIds.map(async orderItemsId => {  
+            const orderItem = await OrderItem.findById(orderItemsId).populate('product', 'price');  
+            const totalPrice = orderItem.product.price * orderItem.quantity;  
+
+            return totalPrice;  
+        }));  
+
+        const totalPrice = totalPrices.reduce((a, d) => a + d, 0);  
+
+        let order = new Order({  
+            orderItems: orderItemsIds,  
+            shappingAddress1,  
+            shappingAddress2,  
+            city,  
+            zip,  
+            country,  
+            phone,  
+            status,  
+            totalPrice,  
+            user: req.user.id  
+        });  
+
+        order = await order.save();  
+        res.status(200).json(order);  
+
+    } catch (err) {   
+        res.status(500).json({ message: err.message });  
+    }  
+});
 
 router.put('/:id', async (req , res)=>{
     try {
@@ -89,7 +136,7 @@ router.delete('/:id', async (req , res)=>{
             await OrderItem.findByIdAndDelete(orderItem)
         })
     })
-        res.status(200).json({order , message : "deleted sucssesfuly"})    
+        res.status(200).json({order , message : "deleted sucssesfuly"})
     } catch (err) {
         res.status(500).json({ message : err.message})
     }

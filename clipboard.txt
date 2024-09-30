@@ -1,7 +1,7 @@
   "name": "aser 5120",
   "description": "work pc",
   "richDescription": "",
-  "trueimage": "",
+  "image": "",
   "images": [],
   "brand": "aser",
   "price": "10000",
@@ -26,14 +26,22 @@
   ////
 
   {
-  "orderItems":[
-{
-  "quantity": 4,
-  "product" : "66e9aba97ad5f60008858e83"
-},
-{
-  "quantity": 1,
-  "product": "66f01ec562502b845b30eaa2"
-}
-]
+{  
+    "shappingAddress1": "123 Example St",  
+    "shappingAddress2": "Apt 4B",  
+    "city": "New York",  
+    "zip": "10001",  
+    "country": "USA",  
+    "phone": 1234567890,  
+    "status": "Pending",  
+    "orderItems": [  
+        {  
+            "quantity": 2,  
+            "product": "66f99eb3ecc66ce0ae6267e0"  
+        },  
+        {  
+            "quantity": 1,  
+            "product": "66f99eaeecc66ce0ae6267dc" 
+        }  
+    ]  
 }
