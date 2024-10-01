@@ -31,8 +31,34 @@ const storage = multer.diskStorage({
     }
   })
 const upload = multer({ storage: storage })
+// Swagger documentation  
+/**  
+ * @swagger  
+ * tags:  
+ *   name: Products  
+ *   description: Product management  
+ */ 
 
-// get products by catygorys
+
+/**  
+ * @swagger  
+ * /product:  
+ *    get:  
+ *      tags: [Products]  
+ *      description: Use to return all products  
+ *      parameters:  
+ *        - name: categorys  
+ *          in: query  
+ *          description: Comma-separated list of category IDs to filter products  
+ *          required: false  
+ *          schema:  
+ *            type: string  
+ *      responses:  
+ *        '200':  
+ *          description: Successful response  
+ *        '500':  
+ *          description: Server error  
+ */
 router.get('/' , async (req , res)=>{
     try {
         let felter = {}
@@ -46,7 +72,25 @@ router.get('/' , async (req , res)=>{
     }
     
 })
-
+/**  
+ * @swagger  
+ * /product/{id}:  
+ *    get:  
+ *      tags: [Products]  
+ *      description: Use to return a specific product  
+ *      parameters:  
+ *        - name: id  
+ *          in: path  
+ *          description: ID of the product to return  
+ *          required: true  
+ *          schema:  
+ *            type: string  
+ *      responses:  
+ *        '200':  
+ *          description: Successful response  
+ *        '500':  
+ *          description: Server error  
+ */ 
 router.get('/:id', async (req , res)=>{
     try {
         const product = await Product.findById(req.params.id)
@@ -55,7 +99,18 @@ router.get('/:id', async (req , res)=>{
         res.status(500).json({ message : error.message})
     }
 })
- 
+/**  
+ * @swagger  
+ * /product/get/Featured:  
+ *    get:  
+ *      tags: [Products]  
+ *      description: Use to return featured products  
+ *      responses:  
+ *        '200':  
+ *          description: Successful response  
+ *        '500':  
+ *          description: Server error  
+ */  
 router.get('/get/Featured', async (req , res)=>{
     try {
         const product = await Product.find({isFeatured : true})
@@ -64,7 +119,47 @@ router.get('/get/Featured', async (req , res)=>{
         res.status(500).json({ message : err.message})
     }
 })
-
+/**  
+ * @swagger  
+ * /product:  
+ *    post:  
+ *      tags: [Products]  
+ *      description: Create a new product  
+ *      security:  
+ *        - bearerAuth: []  
+ *      requestBody:  
+ *        required: true  
+ *        content:  
+ *          application/json:  
+ *            schema:  
+ *              type: object  
+ *              properties:  
+ *                name:  
+ *                  type: string  
+ *                description:  
+ *                  type: string  
+ *                richDescription:  
+ *                  type: string  
+ *                brand:  
+ *                  type: string  
+ *                price:  
+ *                  type: number  
+ *                category:  
+ *                  type: string  
+ *                countInStock:  
+ *                  type: number  
+ *                rating:  
+ *                  type: number  
+ *                numReviews:  
+ *                  type: number  
+ *                isFeatured:  
+ *                  type: boolean  
+ *      responses:  
+ *        '200':  
+ *          description: Successful response with the created product  
+ *        '500':  
+ *          description: Server error  
+ */  
 router.post('/' , authenticateToken , upload.single('image') , async (req , res)=>{        
         try {
         const user = await User.findById(req.user.id)
@@ -97,6 +192,7 @@ router.post('/' , authenticateToken , upload.single('image') , async (req , res)
             brand ,
             price ,
             category ,
+            outOfCarts: countInStock,
             countInStock ,
             rating ,
             numReviews ,
@@ -108,11 +204,55 @@ router.post('/' , authenticateToken , upload.single('image') , async (req , res)
         res.status(500).send({message : err.message})    
     }
 })
-
+/**  
+ * @swagger  
+ * /product:  
+ *    post:  
+ *      tags: [Products]  
+ *      description: Create a new product  
+ *      security:  
+ *        - bearerAuth: []  
+ *      requestBody:  
+ *        required: true  
+ *        content:  
+ *          application/json:  
+ *            schema:  
+ *              type: object  
+ *              properties:  
+ *                name:  
+ *                  type: string  
+ *                description:  
+ *                  type: string  
+ *                richDescription:  
+ *                  type: string  
+ *                brand:  
+ *                  type: string  
+ *                price:  
+ *                  type: number  
+ *                category:  
+ *                  type: string  
+ *                countInStock:  
+ *                  type: number  
+ *                rating:  
+ *                  type: number  
+ *                numReviews:  
+ *                  type: number  
+ *                isFeatured:  
+ *                  type: boolean  
+ *      responses:  
+ *        '200':  
+ *          description: Successful response with the created product  
+ *        '500':  
+ *          description: Server error  
+ */  
 // update product 
 router.put('/:id' ,authenticateToken, async (req , res)=>{
     if(!mongoose.isValidObjectId(req.params.id))return res.status(500).send("invaled product ID")
     try {
+    const USER = await User.findById(req.user.id)
+    if(!USER.isAdmin){     
+        return res.status(400).send("not admin")
+    }
     const user = await User.findById(req.user.id)
     if(!user.isAdmin){     
         return res.status(400).send("not admin")
@@ -147,11 +287,55 @@ router.put('/:id' ,authenticateToken, async (req , res)=>{
     res.status(500).send({message : err.message})    
 }
 })
-
+/**  
+ * @swagger  
+ * /product:  
+ *    post:  
+ *      tags: [Products]  
+ *      description: Create a new product  
+ *      security:  
+ *        - bearerAuth: []  
+ *      requestBody:  
+ *        required: true  
+ *        content:  
+ *          application/json:  
+ *            schema:  
+ *              type: object  
+ *              properties:  
+ *                name:  
+ *                  type: string  
+ *                description:  
+ *                  type: string  
+ *                richDescription:  
+ *                  type: string  
+ *                brand:  
+ *                  type: string  
+ *                price:  
+ *                  type: number  
+ *                category:  
+ *                  type: string  
+ *                countInStock:  
+ *                  type: number  
+ *                rating:  
+ *                  type: number  
+ *                numReviews:  
+ *                  type: number  
+ *                isFeatured:  
+ *                  type: boolean  
+ *      responses:  
+ *        '200':  
+ *          description: Successful response with the created product  
+ *        '500':  
+ *          description: Server error  
+ */  
 // upload products images Array
 router.put('/images/:id' ,authenticateToken,upload.array('images',10), async (req , res)=>{
     if(!mongoose.isValidObjectId(req.params.id))return res.status(500).send("invaled product ID")
     try {
+        const user = await User.findById(req.user.id)
+        if(!user.isAdmin){     
+            return res.status(400).send("not admin")
+        }
         const imagesArray = []
         const files = req.files
         const basePath = `${req.protocol}://${req.get('host')}/uploads/`
@@ -166,9 +350,33 @@ router.put('/images/:id' ,authenticateToken,upload.array('images',10), async (re
     res.status(500).send({message : err.message})    
 }
 })
-
+/**  
+ * @swagger  
+ * /product/{id}:  
+ *    delete:  
+ *      tags: [Products]  
+ *      description: Delete a specific product  
+ *      security:  
+ *        - bearerAuth: []  
+ *      parameters:  
+ *        - name: id  
+ *          in: path  
+ *          required: true  
+ *          description: ID of the product to delete  
+ *          schema:  
+ *            type: string  
+ *      responses:  
+ *        '200':  
+ *          description: Successful response confirming deletion  
+ *        '500':  
+ *          description: Server error  
+ */ 
 router.delete('/:id', authenticateToken,async (req , res)=>{
     try {
+        const USER = await User.findById(req.user.id)
+        if(!USER.isAdmin){     
+            return res.status(400).send("not admin")
+        }
         if(!mongoose.isValidObjectId(req.params.id))return res.status(500).send("invaled product ID")
         const user = await User.findById(req.user.id)
         if(!user.isAdmin){     

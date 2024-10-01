@@ -5,6 +5,42 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const authenticateToken = require('../middleware/authenticateToken')
 
+/**  
+ * @swagger  
+ * tags:  
+ *   name: Users  
+ *   description: User management  
+ */  
+
+/**  
+ * @swagger  
+ * /users:  
+ *    get:  
+ *      tags: [Users]  
+ *      description: Retrieve a list of users  
+ *      responses:  
+ *        '200':  
+ *          description: A list of users  
+ *          content:  
+ *            application/json:  
+ *              schema:  
+ *                type: array  
+ *                items:  
+ *                  type: object  
+ *                  properties:  
+ *                    id:  
+ *                      type: string  
+ *                    name:  
+ *                      type: string  
+ *                    email:  
+ *                      type: string  
+ *                    phone:  
+ *                      type: string  
+ *                    isAdmin:  
+ *                      type: boolean  
+ *        '500':  
+ *          description: Server error  
+ */  
 router.get('/', async (req , res)=>{
     try {
         const users = await User.find().select('-passwordhash')
@@ -14,6 +50,40 @@ router.get('/', async (req , res)=>{
     }
     
 })
+/**  
+ * @swagger  
+ * /users/{id}:  
+ *    get:  
+ *      tags: [Users]  
+ *      description: Get a user by ID  
+ *      parameters:  
+ *        - name: id  
+ *          in: path  
+ *          required: true  
+ *          description: ID of the user to retrieve  
+ *          schema:  
+ *            type: string  
+ *      responses:  
+ *        '200':  
+ *          description: User found  
+ *          content:  
+ *            application/json:  
+ *              schema:  
+ *                type: object  
+ *                properties:  
+ *                  id:  
+ *                    type: string  
+ *                  name:  
+ *                    type: string  
+ *                  email:  
+ *                    type: string  
+ *                  phone:  
+ *                    type: string  
+ *                  isAdmin:  
+ *                    type: boolean  
+ *        '500':  
+ *          description: User not found or server error  
+ */  
 router.get('/:id', async (req , res)=>{
     try {
         const user = await User.findById(req.params.id).select('-passwordhash')
@@ -25,7 +95,45 @@ router.get('/:id', async (req , res)=>{
         res.status(500).json({ message : error.message})
     }
 })
-
+/**  
+ * @swagger  
+ * /users:  
+ *    post:  
+ *      tags: [Users]  
+ *      description: Create a new user  
+ *      requestBody:  
+ *        required: true  
+ *        content:  
+ *          application/json:  
+ *            schema:  
+ *              type: object  
+ *              properties:  
+ *                name:  
+ *                  type: string  
+ *                email:  
+ *                  type: string  
+ *                passwordhash:  
+ *                  type: string  
+ *                phone:  
+ *                  type: string  
+ *                isAdmin:  
+ *                  type: boolean  
+ *                street:  
+ *                  type: string  
+ *                apartment:  
+ *                  type: string  
+ *                zip:  
+ *                  type: string  
+ *                city:  
+ *                  type: string  
+ *                country:  
+ *                  type: string  
+ *      responses:  
+ *        '200':  
+ *          description: User created successfully  
+ *        '500':  
+ *          description: Server error  
+ */  
 router.post('/' , async (req , res)=>{
     try {
         let user = new User({
@@ -46,7 +154,40 @@ router.post('/' , async (req , res)=>{
         res.status(500).json({message : err.message})
     }
 })
-
+/**  
+ * @swagger  
+ * /users/login:  
+ *    post:  
+ *      tags: [Users]  
+ *      description: User login  
+ *      requestBody:  
+ *        required: true  
+ *        content:  
+ *          application/json:  
+ *            schema:  
+ *              type: object  
+ *              properties:  
+ *                email:  
+ *                  type: string  
+ *                password:  
+ *                  type: string  
+ *      responses:  
+ *        '200':  
+ *          description: User logged in successfully  
+ *          content:  
+ *            application/json:  
+ *              schema:  
+ *                type: object  
+ *                properties:  
+ *                  user:  
+ *                    type: string  
+ *                  token:  
+ *                    type: string  
+ *        '401':  
+ *          description: Invalid login credentials  
+ *        '500':  
+ *          description: Server error  
+ */  
 router.post('/login' , async (req,res)=>{
     try {
         const user = await User.findOne({email : req.body.email})
@@ -63,9 +204,38 @@ router.post('/login' , async (req,res)=>{
         res.status(500).json({message : err.message})
     }
 })
-router.put('/' , async (req , res)=>{
 
-})
+/**  
+ * @swagger  
+ * /users:  
+ *    put:  
+ *      tags: [Users]  
+ *      description: Update user information  
+ *      security:  
+ *        - bearerAuth: []  
+ *      requestBody:  
+ *        required: true  
+ *        content:  
+ *          application/json:  
+ *            schema:  
+ *              type: object  
+ *              properties:  
+ *                name:  
+ *                  type: string  
+ *                oldPassword:  
+ *                  type: string  
+ *                newPassword:  
+ *                  type: string  
+ *      responses:  
+ *        '200':  
+ *          description: User information updated successfully  
+ *        '404':  
+ *          description: User not found  
+ *        '403':  
+ *          description: Old password is incorrect  
+ *        '500':  
+ *          description: Server error  
+ */ 
 router.put('/', authenticateToken, async (req, res) => {  
     const { name, oldPassword, newPassword } = req.body;  
 

@@ -6,7 +6,43 @@ const Product = require('../modules/product')
 const authenticateToken = require('../middleware/authenticateToken')
 
 
-
+/**  
+ * @swagger  
+ * /orders:  
+ *    get:  
+ *      tags: [Orders]  
+ *      description: Retrieve a list of orders  
+ *      responses:  
+ *        '200':  
+ *          description: A list of orders  
+ *          content:  
+ *            application/json:  
+ *              schema:  
+ *                type: array  
+ *                items:  
+ *                  type: object  
+ *                  properties:  
+ *                    id:  
+ *                      type: string  
+ *                    user:  
+ *                      type: object  
+ *                      properties:  
+ *                        name:  
+ *                          type: string  
+ *                    orderItems:  
+ *                      type: array  
+ *                      items:  
+ *                        type: object  
+ *                        properties:  
+ *                          product:  
+ *                            type: string  
+ *                          quantity:  
+ *                            type: integer  
+ *                    totalPrice:  
+ *                      type: number  
+ *        '500':  
+ *          description: Server error  
+ */  
 router.get('/', async (req , res)=>{
     try {
         const orderslist = await Order.find()
@@ -17,6 +53,50 @@ router.get('/', async (req , res)=>{
     }
     
 })
+/**  
+ * @swagger  
+ * /orders/{id}:  
+ *    get:  
+ *      tags: [Orders]  
+ *      description: Retrieve an order by ID  
+ *      parameters:  
+ *        - name: id  
+ *          in: path  
+ *          required: true  
+ *          description: ID of the order to retrieve  
+ *          schema:  
+ *            type: string  
+ *      responses:  
+ *        '200':  
+ *          description: Order found  
+ *          content:  
+ *            application/json:  
+ *              schema:  
+ *                type: object  
+ *                properties:  
+ *                  id:  
+ *                    type: string  
+ *                  user:  
+ *                    type: object  
+ *                    properties:  
+ *                      name:  
+ *                        type: string  
+ *                  orderItems:  
+ *                    type: array  
+ *                    items:  
+ *                      type: object  
+ *                      properties:  
+ *                        product:  
+ *                          type: string  
+ *                        quantity:  
+ *                          type: integer  
+ *                  totalPrice:  
+ *                    type: number  
+ *        '404':  
+ *          description: Order not found  
+ *        '500':  
+ *          description: Server error  
+ */  
 router.get('/:id', async (req , res)=>{
     try {
         const order = await Order.findById(req.params.id)
@@ -31,7 +111,95 @@ router.get('/:id', async (req , res)=>{
     }
     
 })
-// Create an order  
+
+/**  
+ * @swagger  
+ * /orders:  
+ *    post:  
+ *      tags: [Orders]  
+ *      description: Create a new order  
+ *      security:  
+ *        - bearerAuth: []  
+ *      requestBody:  
+ *        required: true  
+ *        content:  
+ *          application/json:  
+ *            schema:  
+ *              type: object  
+ *              properties:  
+ *                shappingAddress1:  
+ *                  type: string  
+ *                  description: Primary shipping address  
+ *                shappingAddress2:  
+ *                  type: string  
+ *                  description: Secondary shipping address (optional)  
+ *                city:  
+ *                  type: string  
+ *                  description: City of the shipping address  
+ *                zip:  
+ *                  type: string  
+ *                  description: Zip code for the shipping address  
+ *                country:  
+ *                  type: string  
+ *                  description: Country of the shipping address  
+ *                phone:  
+ *                  type: string  
+ *                  description: Phone number for the order  
+ *                status:  
+ *                  type: string  
+ *                  description: Status of the order  
+ *                orderItems:  
+ *                  type: array  
+ *                  items:  
+ *                    type: object  
+ *                    properties:  
+ *                      quantity:  
+ *                        type: integer  
+ *                        description: Quantity of the product ordered  
+ *                      product:  
+ *                        type: string  
+ *                        description: ID of the product being ordered  
+ *      responses:  
+ *        '200':  
+ *          description: Order created successfully  
+ *          content:  
+ *            application/json:  
+ *              schema:  
+ *                type: object  
+ *                properties:  
+ *                  id:  
+ *                    type: string  
+ *                    description: ID of the newly created order  
+ *                  orderItems:  
+ *                    type: array  
+ *                    items:  
+ *                      type: string  
+ *                  shappingAddress1:  
+ *                    type: string  
+ *                  shappingAddress2:  
+ *                    type: string  
+ *                  city:  
+ *                    type: string  
+ *                  zip:  
+ *                    type: string  
+ *                  country:  
+ *                    type: string  
+ *                  phone:  
+ *                    type: string  
+ *                  status:  
+ *                    type: string  
+ *                  totalPrice:  
+ *                    type: number  
+ *                    format: float  
+ *                  user:  
+ *                    type: string  
+ *        '400':  
+ *          description: Bad request, missing or invalid fields  
+ *        '401':  
+ *          description: Unauthorized, authentication failed  
+ *        '500':  
+ *          description: Server error  
+ */ 
 router.post('/', authenticateToken, async (req, res) => {  
     try {    
         const {  
@@ -112,7 +280,33 @@ router.post('/', authenticateToken, async (req, res) => {
         res.status(500).json({ message: err.message });  
     }  
 });
-
+/**  
+ * @swagger  
+ * /orders/{id}:  
+ *    put:  
+ *      tags: [Orders]  
+ *      description: Update the status of an existing order by ID  
+ *      parameters:  
+ *        - name: id  
+ *          in: path  
+ *          required: true  
+ *          description: ID of the order to update  
+ *          schema:  
+ *            type: string  
+ *      requestBody:  
+ *        required: true  
+ *        content:  
+ *          application/json:  
+ *            schema:  
+ *                  $ref : '#components/schema/orders' 
+ *      responses:  
+ *        '200':  
+ *          description: Order status updated successfully  
+ *        '404':  
+ *          description: Order not found  
+ *        '500':  
+ *          description: Server error  
+ */
 router.put('/:id', async (req , res)=>{
     try {
         const {status} = req.body
@@ -125,7 +319,27 @@ router.put('/:id', async (req , res)=>{
         res.status(500).json({ message : err.message})
     }
 })
-
+/**  
+ * @swagger  
+ * /orders/{id}:  
+ *    delete:  
+ *      tags: [Orders]  
+ *      description: Delete an order by ID  
+ *      parameters:  
+ *        - name: id  
+ *          in: path  
+ *          required: true  
+ *          description: ID of the order to delete  
+ *          schema:  
+ *            type: string  
+ *      responses:  
+ *        '200':  
+ *          description: Order deleted successfully  
+ *        '404':  
+ *          description: Order not found  
+ *        '500':  
+ *          description: Server error  
+ */ 
 router.delete('/:id', async (req , res)=>{
     try{
     const order = await Order.findByIdAndDelete( req.params.id ).then( async order=>{
