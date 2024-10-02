@@ -134,7 +134,7 @@ router.get('/:id', async (req , res)=>{
  *        '500':  
  *          description: Server error  
  */  
-router.post('/' , async (req , res)=>{
+router.post('/signin' , async (req , res)=>{
     try {
         let user = new User({
             name :req.body.name,
@@ -191,7 +191,7 @@ router.post('/' , async (req , res)=>{
 router.post('/login' , async (req,res)=>{
     try {
         const user = await User.findOne({email : req.body.email})
-
+        
         if(!user){return res.status(401).json({message :"not found"})}
 
         if(user &&  bcrypt.compareSync(req.body.password , user.passwordhash)){

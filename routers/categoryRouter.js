@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const Category = require('../modules/category')
+const authenticateToken = require('../middleware/authenticateToken')
+const User = require('../modules/user')
 /**  
  * @swagger  
  * tags:  
@@ -114,10 +116,14 @@ router.get('/:id', async (req , res)=>{
  *        '500':  
  *          description: Server error  
  */  
-router.post('/', async (req , res)=>{
+router.post('/', authenticateToken,async (req , res)=>{
     try {
+        const USER = await User.findById(req.user.id)
+        if(!USER.isAdmin){     
+            return res.status(400).send("not admin")
+        }
         const {name , color , icon} =  req.body
-        let category = new Category( {name , color , icon} )
+        let category = new Category( {name : req.body.name , color :req.body.color, icon : req.body.icon} )
         category = await category.save()
         res.send(category)    
     } catch (err) {
@@ -159,8 +165,12 @@ router.post('/', async (req , res)=>{
  *        '500':  
  *          description: Server error  
  */  
-router.put('/:id', async (req , res)=>{
+router.put('/:id',authenticateToken ,async (req , res)=>{
     try {
+        const USER = await User.findById(req.user.id)
+        if(!USER.isAdmin){     
+            return res.status(400).send("not admin")
+        }
         const {name , color , icon} = req.body
         const category = await Category.findByIdAndUpdate(
             req.params.id,
@@ -196,8 +206,12 @@ router.put('/:id', async (req , res)=>{
  *        '500':  
  *          description: Server error  
  */  
-router.delete('/:id', async (req , res)=>{
+router.delete('/:id',authenticateToken, async (req , res)=>{
     try {
+        const USER = await User.findById(req.user.id)
+        if(!USER.isAdmin){     
+            return res.status(400).send("not admin")
+        }
         const category = await Category.findByIdAndDelete(req.params.id)
         res.status(200).send(category)    
     } catch (err) {

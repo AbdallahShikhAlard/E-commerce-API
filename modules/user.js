@@ -30,10 +30,6 @@ const UserSchema = mongoose.Schema({
         type : String,
         default : ''
     },
-    zip : {
-        type : String,
-        default : ''
-    },
     city : {
         type : String,
         default : ''

@@ -198,7 +198,7 @@ router.post('/' , authenticateToken , upload.single('image') , async (req , res)
             numReviews ,
             isFeatured 
         })
-        product = await product.save()  
+        product = await product.save() 
         res.status(200).send(product)     
     } catch (err) {
         res.status(500).send({message : err.message})    
@@ -289,45 +289,47 @@ router.put('/:id' ,authenticateToken, async (req , res)=>{
 })
 /**  
  * @swagger  
- * /product:  
- *    post:  
- *      tags: [Products]  
- *      description: Create a new product  
- *      security:  
- *        - bearerAuth: []  
- *      requestBody:  
- *        required: true  
- *        content:  
- *          application/json:  
- *            schema:  
- *              type: object  
- *              properties:  
- *                name:  
- *                  type: string  
- *                description:  
- *                  type: string  
- *                richDescription:  
- *                  type: string  
- *                brand:  
- *                  type: string  
- *                price:  
- *                  type: number  
- *                category:  
- *                  type: string  
- *                countInStock:  
- *                  type: number  
- *                rating:  
- *                  type: number  
- *                numReviews:  
- *                  type: number  
- *                isFeatured:  
- *                  type: boolean  
- *      responses:  
- *        '200':  
- *          description: Successful response with the created product  
- *        '500':  
- *          description: Server error  
- */  
+ * /images/{id}:  
+ *   put:  
+ *     summary: Update product images  
+ *     tags: [Products]  
+ *     description: Update the images of an existing product.  
+ *     parameters:  
+ *       - in: path  
+ *         name: id  
+ *         required: true  
+ *         schema:  
+ *           type: string  
+ *         description: The product ID to update images for.  
+ *       - in: formData  
+ *         name: images  
+ *         required: true  
+ *         type: array  
+ *         items:  
+ *           type: string  
+ *           format: binary  
+ *         description: An array of images to upload (max 10).  
+ *     responses:  
+ *       200:  
+ *         description: Product images updated successfully.  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 _id:  
+ *                   type: string  
+ *                   description: The product ID.  
+ *                 images:  
+ *                   type: array  
+ *                   items:  
+ *                     type: string  
+ *                   description: An array of image URLs.  
+ *       400:  
+ *         description: Not an admin or invalid request.  
+ *       500:  
+ *         description: Server error.  
+ */
 // upload products images Array
 router.put('/images/:id' ,authenticateToken,upload.array('images',10), async (req , res)=>{
     if(!mongoose.isValidObjectId(req.params.id))return res.status(500).send("invaled product ID")
